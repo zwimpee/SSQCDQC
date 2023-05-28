@@ -1,0 +1,246 @@
+class Bosonic(SSQCSimulatorMetaDataStore):
+    def __init__(
+        self,
+        pipeline_name,
+        pipeline_root,
+        artifact_store: ArtifactStore,
+        run_id: str,
+        kwargs: Dict[str, Any]
+    ):
+        super().__init__(artifact_store, pipeline_name, pipeline_root, run_id, kwargs)
+        self.pipeline_name = pipeline_name
+        self.pipeline_root = pipeline_root
+        self.metadata_path = os.path.join(self.pipeline_root, 'metadata')
+        self.metadata = SSQCSimulatorMetaDataStore(self.metadata_path)
+        self.metadata_view = self.get_metadata_view()
+
+    def list_artifacts(self):
+        artifacts = self.metadata_view.get_all_artifacts()
+        for artifact in artifacts:
+            print(artifact)
+
+    def get_artifact(self, artifact_id):
+        artifact = self.metadata_view.get_artifact(artifact_id)
+        print(artifact)
+
+    def list_executions(self):
+        executions = self.metadata_view.get_all_executions()
+        for execution in executions:
+            print(execution)
+
+    def get_execution(self, execution_id):
+        execution = self.metadata_view.get_execution(execution_id)
+        print(execution)
+
+    def list_contexts(self):
+        contexts = self.metadata_view.get_all_contexts()
+        for context in contexts:
+            print(context)
+
+    def get_context(self, context_id):
+        context = self.metadata_view.get_context(context_id)
+        print(context)
+
+    def list_types(self):
+        artifact_types = self.metadata_view.get_all_artifact_types()
+        for artifact_type in artifact_types:
+            print(artifact_type)
+
+    def get_type(self, type_name):
+        artifact_type = self.metadata_view.get_artifact_type(type_name)
+        print(artifact_type)
+
+    def observe_state(self, qubit_state):
+        backend = Aer.get_backend('statevector_simulator')
+        circuit = QuantumCircuit(len(qubit_state))
+        for i, state in enumerate(qubit_state):
+            if state == 1:
+                circuit.x(i)  # Apply X gate for state 1
+        job = execute(circuit, backend)
+        result = job.result()
+        statevector = result.get_statevector(circuit)
+        print(statevector)
+
+    def observe_quantum_state(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_state(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_algorithm(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_circuit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_error_correction(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_qubit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_circuit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_error_correction(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_qubit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_state(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_algorithm(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_wolfram(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_metadata(self, artifact: Any):
+        return self.metadata_view.get_all_artifacts(artifact)
+
+    def get_metadata_view(self, metadata_view: Dict[MetadataViewTypes, Any] = None) -> MetadataV:
+        self.metadata_view = metadata_view
+        return self.metadata_view
+
+    def observe_supersymmetric(self, param):
+        return self.metadata_view.get_all_artifacts(param)
+
+    def instantiate_pipeline(self):
+        pass
+
+
+class Fermionic(Bosonic):
+    def __init__(self, pipeline_name, pipeline_root):
+        super().__init__(pipeline_name, pipeline_root)
+        self.bosonic_agent = Bosonic(pipeline_name, pipeline_root)
+        self.pipeline = self.create_pipeline()
+
+    def create_pipeline(self):
+        pipeline_root = os.path.join(self.pipeline_root, self.pipeline_name)
+
+        # Create a metadata connection
+        connection_config = self.bosonic_agent.metadata.sqlite_metadata_connection_config(pipeline_root)
+        metadata_store = self.bosonic_agent.metadata.MetadataStore
+        logging.info("Metadata store created with root: %s", pipeline_root)
+
+        # Create an InteractiveContext
+        context = self.metadata_view.InteractiveContext(
+            pipeline_name=self.pipeline_name,
+            pipeline_root=pipeline_root,
+            metadata_connection_config=connection_config
+        )
+
+        # Define the components
+        example_gen = CsvExampleGen(input_base="path/to/input_data")
+        statistics_gen = StatisticsGen(examples=example_gen.outputs["statistics"])
+        schema_gen = SchemaGen(statistics=statistics_gen.outputs["statistics"])
+        example_validator = ExampleValidator(
+            statistics=statistics_gen.outputs["statistics"],
+            schema=schema_gen.outputs["schema"]
+        )
+        transform = Transform(
+            examples=example_gen.outputs["examples"],
+            schema=schema_gen.outputs["schema"],
+            module_file="path/to/transform_module.py"
+        )
+        trainer = Trainer(
+            module_file="path/to/trainer_module.py",
+            transformed_examples=transform.outputs["transformed_examples"],
+            schema=schema_gen.outputs["schema"],
+            transform_graph=transform.outputs["transform_graph"],
+            train_args=tfx.proto.TrainArgs(num_steps=100),
+            eval_args=tfx.proto.EvalArgs(num_steps=50)
+        )
+        pusher = Pusher(
+            model=trainer.outputs["model"],
+            push_destination=tfx.proto.PushDestination(
+                filesystem=tfx.proto.PushDestination.Filesystem(
+                    base_directory="path/to/push_destination"
+                )
+            )
+        )
+        bulk_inferrer = BulkInferrer(
+            examples=example_gen.outputs["examples"],
+            model=trainer.outputs["model"],
+            model_blessing=pusher.outputs["model_blessing"],
+            data_spec=BulkInferrerSpec(
+                output_example_spec=tfx.proto.OutputExampleSpec(
+                    features=Features(
+                        feature={
+                            "output1": Feature(shape=FixedShape(dim=[1]), dtype=FeatureType.FLOAT),
+                            "output2": Feature(shape=FixedShape(dim=[1]), dtype=FeatureType.FLOAT)
+                        }
+                    )
+                )
+            )
+        )
+
+        # Define the pipeline
+        components = [
+            example_gen,
+            statistics_gen,
+            schema_gen,
+            example_validator,
+            transform,
+            trainer,
+            pusher,
+            bulk_inferrer
+        ]
+        return dict(
+            pipeline=tfx.dsl.Pipeline(
+                pipeline_name=self.pipeline_name,
+                pipeline_root=pipeline_root,
+                components=components,
+                enable_cache=True,
+                metadata_connection_config=connection_config
+            ),
+            components=components,
+            context=context
+        )
+
+    def run_pipeline(self):
+        self.pipeline["context"].run(self.pipeline["pipeline"])
+
+    def observe_supersymmetric(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_circuit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_error_correction(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_qubit(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_state(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_algorithm(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_supersymmetric_simulation_wolfram(self, qubit_state):
+        self.observe_state(qubit_state)
+
+    def observe_metadata(self, artifact: Any):
+        return self.metadata_view.get_all_artifacts(artifact)
+
+    def get_metadata_view(self, metadata_view: Dict[MetadataViewTypes, Any] = None):
+        self.metadata_view = Any
+        return self.metadata_view
+
+    def observe_state(self, qubit_state):
+        self.qubit_state = qubit_state
+
+    def observe_state_view(self, Any):
+        self.state_view = Any
+
+    # TODO: Add a class for the artifact store viewer
