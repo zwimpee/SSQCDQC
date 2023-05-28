@@ -299,3 +299,81 @@ _CONFIG = dict(
         BulkInferrer="Channel"
     )
 )
+
+class SSQCPipelineConfig(PipelineConfig):
+    """
+    SuperSymmetric Quantum Computer Pipeline Configuration
+    """
+
+    def __init__(self, **kwargs):
+        super(SSQCPipelineConfig, self).__init__(**kwargs)
+        self._logger = logging.getLogger(__name__)
+        self._logger.setLevel(logging.DEBUG)
+        self._logger.info("Initializing SSQC Pipeline Configuration...")
+        self._logger.info("Initializing SSQC Pipeline Components...")
+        self._components = _PIPELINE_COMPONENTS
+        self._logger.info("Initializing SSQC Pipeline Components Spec...")
+        self._components_spec = _PIPELINE_COMPONENTS_SPEC
+        self._logger.info("Initializing SSQC Pipeline Components Channel...")
+        self._components_channel = _PIPELINE_COMPONENTS_CHANNEL
+        self._logger.info("Initializing SSQC Pipeline Components Output...")
+        self._components_output = _PIPELINE_COMPONENTS_OUTPUT
+        self._logger.info("Initializing SSQC Pipeline Components Input...")
+        self._components_input = _PIPELINE_COMPONENTS_INPUT
+        self._logger.info("Initializing SSQC Pipeline Components Output Channel...")
+        self._components_output_channel = _PIPELINE_COMPONENTS_OUTPUT_CHANNEL
+        self._logger.info("Initializing SSQC Pipeline Components Input Channel...")
+        self._components_input_channel = _PIPELINE_COMPONENTS_INPUT_CHANNEL
+        self._logger.info("Initializing SSQC Pipeline Components Output Spec...")
+        self._components_output_spec = _PIPELINE_COMPONENTS_OUTPUT_SPEC
+        self._logger.info("Initializing SSQC Pipeline Components Input Spec...")
+        self._components_input_spec = _PIPELINE_COMPONENTS_INPUT_SPEC
+        self._logger.info("Initializing SSQC Pipeline Components Output Spec Type...")
+        self._components_output_spec_type = _PIPELINE_COMPONENTS_OUTPUT_SPEC_TYPE
+        self._logger.info("Initializing SSQC Pipeline Components Input Spec Type...")
+        self._components_input_spec_type = _PIPELINE_COMPONENTS_INPUT_SPEC_TYPE
+
+    @property
+    def components(self):
+        return self._components
+
+    @property
+    def components_spec(self):
+        return self._components_spec
+
+    @property
+    def components_channel(self):
+        return self._components_channel
+
+    @property
+    def components_output(self):
+        return self._components_output
+
+    @property
+    def components_input(self):
+        return self._components_input
+
+    @property
+    def components_output_channel(self):
+        return self._components_output_channel
+
+    @property
+    def components_input_channel(self):
+        return self._components_input_channel
+
+    @property
+    def components_output_spec(self):
+        return self._components_output_spec
+
+    @property
+    def components_input_spec(self):
+        return self._components_input_spec
+
+    @property
+    def components_output_spec_type(self):
+        return self._components_output_spec_type
+
+    @property
+    def components_input_spec_type(self):
+        return self._components_input_spec_type
+
