@@ -5,5 +5,7 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"python.envFile": "${workspaceFolder}\\.databricks\\.databricks.env"
+	}
 }
